@@ -1,0 +1,117 @@
+{
+  "tasks": [
+    {
+      "id": 1783015848449,
+      "text": "Orientação: inserir Agabho no Lattes (coincluída)",
+      "group": "orientacoes"
+    },
+    {
+      "id": 1783015848450,
+      "text": "Orientação: inserir João Reale no Lattes (coincluída)",
+      "group": "orientacoes"
+    },
+    {
+      "id": 1783015848451,
+      "text": "Orientação: inserir Geysi no Lattes (coincluída)",
+      "group": "orientacoes"
+    },
+    {
+      "id": 1783015848452,
+      "text": "Orientação: inserir Pedro Teixeira no Lattes (coincluída)",
+      "group": "orientacoes"
+    },
+    {
+      "id": 1783015848453,
+      "text": "Orientação: inserir Gabriel Warrak no Lattes (coincluída)",
+      "group": "orientacoes"
+    },
+    {
+      "id": 1783015848454,
+      "text": "Parecer 2026: Maracanã",
+      "group": "pareceres"
+    },
+    {
+      "id": 1783015848455,
+      "text": "Parecer 2026: Histórias, Histórias",
+      "group": "pareceres"
+    },
+    {
+      "id": 1783015848456,
+      "text": "Parecer 2026: Cantareira",
+      "group": "pareceres"
+    },
+    {
+      "id": 1783015848457,
+      "text": "Inserir Aula Summer School Pisa e encerrar pós-doc de Pisa no Lattes",
+      "group": "lattes"
+    },
+    {
+      "id": 1783015848458,
+      "text": "Inserir pós-doc da UnB no Lattes",
+      "group": "lattes"
+    },
+    {
+      "id": 1783015848459,
+      "text": "Produzir artigo sobre os depositantes de Havana",
+      "group": "artigos"
+    },
+    {
+      "id": 1783015848460,
+      "text": "Produzir artigo geral sobre a tese em português",
+      "group": "artigos"
+    },
+    {
+      "id": 1783015848461,
+      "text": "Produzir artigo comparando a Caixa da Corte com outros no mundo no mesmo período (inglês)",
+      "group": "artigos"
+    },
+    {
+      "id": 1783015848462,
+      "text": "Produzir artigo da Bolsa de Valores",
+      "group": "artigos"
+    },
+    {
+      "id": 1783015848463,
+      "text": "Publicação em inglês sem comparação com Levy, com outras comparações",
+      "group": "artigos"
+    },
+    {
+      "id": 1783015848464,
+      "text": "Continuar produzindo o site OGUM",
+      "group": "outros"
+    },
+    {
+      "id": 1783015848465,
+      "text": "Diamantina/Cedeplar – já enviado, verificar publicação",
+      "group": "outros"
+    }
+  ],
+  "history": [],
+  "groups": [
+    {
+      "key": "orientacoes",
+      "label": "Orientações",
+      "icon": "🎓"
+    },
+    {
+      "key": "pareceres",
+      "label": "Pareceres",
+      "icon": "📝"
+    },
+    {
+      "key": "lattes",
+      "label": "Lattes",
+      "icon": "💻"
+    },
+    {
+      "key": "artigos",
+      "label": "Artigos",
+      "icon": "📄"
+    },
+    {
+      "key": "outros",
+      "label": "Outros",
+      "icon": "📌"
+    }
+  ]
+}
