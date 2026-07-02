@@ -1,16 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1783015848452,
-      "text": "Orientação: inserir Pedro Teixeira no Lattes (coincluída)",
-      "group": "orientacoes"
-    },
-    {
-      "id": 1783015848453,
-      "text": "Orientação: inserir Gabriel Warrak no Lattes (coincluída)",
-      "group": "orientacoes"
-    },
-    {
       "id": 1783015848454,
       "text": "Parecer 2026: Maracanã",
       "group": "pareceres"
@@ -82,6 +72,14 @@
     },
     {
       "text": "Orientação: inserir Geysi no Lattes (coincluída)",
+      "date": "02/07/2026"
+    },
+    {
+      "text": "Orientação: inserir Pedro Teixeira no Lattes (coincluída)",
+      "date": "02/07/2026"
+    },
+    {
+      "text": "Orientação: inserir Gabriel Warrak no Lattes (coincluída)",
       "date": "02/07/2026"
     }
   ],
