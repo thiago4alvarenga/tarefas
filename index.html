@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Minhas Tarefas</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f5f4f0;
+    color: #2c2c2c;
+    min-height: 100vh;
+    padding: 20px 16px 80px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; color: #1a1a1a; letter-spacing: -0.5px; }
+
+  .sync-bar {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sync-status {
+    font-size: 0.72rem; color: #aaa;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #ccc;
+    flex-shrink: 0; transition: background 0.3s;
+  }
+  .sync-dot.ok     { background: #4caf50; }
+  .sync-dot.saving { background: #f0a500; animation: pulse 0.8s infinite; }
+  .sync-dot.error  { background: #e05; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .btn-icon {
+    background: none; border: none; cursor: pointer;
+    color: #bbb; font-size: 1.1rem; padding: 4px;
+    transition: color 0.15s; line-height: 1;
+  }
+  .btn-icon:hover { color: #5b6af0; }
+
+  /* ── SETUP SCREEN ── */
+  #setup-screen {
+    background: #fff; border-radius: 16px; padding: 28px 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  #setup-screen h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
+  #setup-screen p  { font-size: 0.88rem; color: #666; margin-bottom: 20px; line-height: 1.5; }
+  #setup-screen a  { color: #5b6af0; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.78rem; font-weight: 600; color: #666; margin-bottom: 4px; }
+  .field input {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid #ddd; border-radius: 9px;
+    font-size: 0.9rem; font-family: inherit;
+    outline: none; transition: border-color 0.15s; background: #fafafa;
+  }
+  .field input:focus { border-color: #5b6af0; background: #fff; }
+
+  .hint { font-size: 0.75rem; color: #aaa; margin-top: 4px; }
+
+  /* ── ADD TASK ── */
+  .add-box {
+    background: #fff; border-radius: 14px; padding: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px;
+  }
+  .add-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .add-row input {
+    flex: 1; padding: 10px 13px;
+    border: 1.5px solid #ddd; border-radius: 9px;
+    font-size: 0.95rem; background: #fafafa; outline: none;
+    transition: border-color 0.15s;
+  }
+  .add-row input:focus { border-color: #5b6af0; background: #fff; }
+  .add-row button {
+    padding: 10px 18px; background: #5b6af0; color: #fff;
+    border: none; border-radius: 9px; font-size: 1.2rem;
+    cursor: pointer; transition: background 0.15s; line-height: 1; flex-shrink: 0;
+  }
+  .add-row button:hover { background: #4a58d8; }
+
+  .cat-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+  .cat-chips::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 11px; border-radius: 20px;
+    border: 1.5px solid #e0e0e0; background: #f5f4f0;
+    font-size: 0.78rem; font-weight: 500; color: #777;
+    cursor: pointer; white-space: nowrap; transition: all 0.12s; flex-shrink: 0;
+  }
+  .cat-chip:hover { border-color: #5b6af0; color: #5b6af0; }
+  .cat-chip.selected { background: #5b6af0; border-color: #5b6af0; color: #fff; }
+  .cat-chip.new-cat { border-style: dashed; color: #aaa; border-color: #ccc; }
+  .cat-chip.new-cat:hover { border-color: #5b6af0; color: #5b6af0; }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.09em; color: #888;
+    margin-bottom: 8px; margin-top: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .section-label .count {
+    background: #e8e8e8; color: #888; border-radius: 20px;
+    padding: 1px 7px; font-size: 0.7rem;
+  }
+
+  /* ── GROUP ── */
+  .group { margin-bottom: 4px; }
+  .group-header {
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: #aaa;
+    padding: 14px 4px 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  /* ── TASK ITEM ── */
+  .task-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: #fff; border-radius: 10px; padding: 12px;
+    margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    animation: fadein 0.2s ease;
+  }
+  @keyframes fadein { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:none} }
+
+  .task-check {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid #ccc; flex-shrink: 0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; transition: border-color 0.15s, background 0.15s;
+  }
+  .task-check:hover { border-color: #5b6af0; }
+  .task-check.done { background: #5b6af0; border-color: #5b6af0; }
+  .task-check.done::after {
+    content:''; width:6px; height:10px;
+    border:2px solid #fff; border-top:none; border-left:none;
+    transform:rotate(45deg) translateY(-1px);
+  }
+
+  .task-body { flex: 1; min-width: 0; }
+  .task-text {
+    font-size: 0.93rem; line-height: 1.45; word-break: break-word;
+    cursor: text; outline: none; min-height: 1.4em; display: block;
+  }
+  .task-text:focus { background:#f0f1ff; border-radius:4px; padding:2px 4px; margin:-2px -4px; }
+
+  .task-actions { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+  .btn-action {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px; border-radius: 6px;
+    font-size: 0.73rem; font-weight: 500; cursor: pointer;
+    border: 1px solid; transition: background 0.12s; white-space: nowrap; background: none;
+  }
+  .btn-cal  { color:#5b6af0; border-color:#d0d4ff; background:#eef0ff; }
+  .btn-cal:hover  { background:#dde0ff; }
+  .btn-move { color:#888; border-color:#e0e0e0; background:#f5f5f3; }
+  .btn-move:hover { background:#ebebea; color:#444; }
+
+  .task-del {
+    background:none; border:none; color:#ccc; cursor:pointer;
+    font-size:1.05rem; padding:0 2px; line-height:1;
+    flex-shrink:0; margin-top:2px; transition:color 0.15s; align-self:flex-start;
+  }
+  .task-del:hover { color:#e05; }
+
+  /* ── HISTORY ── */
+  .history-item {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px 14px; margin-bottom:6px; border-radius:10px;
+    background:#f0f0ee; color:#999; font-size:0.88rem; line-height:1.4;
+  }
+  .history-check {
+    width:18px; height:18px; border-radius:50%; background:#ccc;
+    flex-shrink:0; display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .history-check::after {
+    content:''; width:4px; height:8px;
+    border:2px solid #fff; border-top:none; border-left:none;
+    transform:rotate(45deg) translateY(-1px);
+  }
+  .history-text { flex:1; text-decoration:line-through; word-break:break-word; }
+  .history-date { font-size:0.72rem; color:#bbb; white-space:nowrap; margin-top:2px; }
+  .clear-history {
+    background:none; border:none; color:#bbb; font-size:0.78rem;
+    cursor:pointer; margin-top:12px; text-decoration:underline; padding:0;
+  }
+  .clear-history:hover { color:#e05; }
+  .empty { color:#bbb; font-size:0.88rem; padding:10px 0; }
+
+  .history-toggle {
+    display:flex; align-items:center; gap:6px; cursor:pointer; color:#888;
+    font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.09em;
+    margin-top:32px; margin-bottom:10px; background:none; border:none; padding:0;
+  }
+  .history-toggle .arrow { font-size:0.65rem; transition:transform 0.2s; }
+  .history-toggle.open .arrow { transform:rotate(90deg); }
+
+  /* ── MODALS ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.4); z-index:100;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-overlay.active { display:flex; }
+  .modal {
+    background:#fff; border-radius:16px; padding:24px;
+    width:100%; max-width:420px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.18); animation:fadein 0.18s ease;
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { font-size:1rem; font-weight:700; margin-bottom:16px; color:#1a1a1a; }
+  .modal label { display:block; font-size:0.78rem; font-weight:600; color:#666; margin-bottom:4px; margin-top:12px; }
+  .modal input, .modal textarea, .modal select {
+    width:100%; padding:10px 12px;
+    border:1.5px solid #ddd; border-radius:8px;
+    font-size:0.9rem; font-family:inherit;
+    outline:none; transition:border-color 0.15s; background:#fafafa;
+  }
+  .modal input:focus, .modal textarea:focus { border-color:#5b6af0; background:#fff; }
+  .modal textarea { resize:vertical; min-height:60px; }
+  .modal-row { display:flex; gap:8px; margin-top:12px; }
+  .modal-row input { flex:1; }
+  .modal-actions { display:flex; gap:8px; margin-top:20px; }
+  .btn-primary {
+    flex:1; padding:11px; background:#5b6af0; color:#fff;
+    border:none; border-radius:9px; font-size:0.9rem; font-weight:600;
+    cursor:pointer; transition:background 0.15s;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btn-primary:hover { background:#4a58d8; }
+  .btn-secondary {
+    padding:11px 16px; background:#f0f0ee; color:#666;
+    border:none; border-radius:9px; font-size:0.9rem; font-weight:600;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .btn-secondary:hover { background:#e5e5e2; }
+
+  /* emoji picker */
+  .emoji-row { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
+  .emoji-opt {
+    width:36px; height:36px; border-radius:8px;
+    border:2px solid transparent; background:#f5f4f0;
+    cursor:pointer; font-size:1.1rem;
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color 0.1s, background 0.1s;
+  }
+  .emoji-opt:hover { background:#eef0ff; }
+  .emoji-opt.selected { border-color:#5b6af0; background:#eef0ff; }
+
+  /* move chips */
+  .move-chips { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .move-chip {
+    padding:5px 12px; border-radius:20px; border:1.5px solid #e0e0e0;
+    font-size:0.82rem; cursor:pointer; transition:all 0.12s; background:#f5f4f0; color:#555;
+  }
+  .move-chip:hover { border-color:#5b6af0; color:#5b6af0; }
+  .move-chip.current { background:#5b6af0; border-color:#5b6af0; color:#fff; cursor:default; }
+
+  /* error message */
+  .err-msg { color:#e05; font-size:0.8rem; margin-top:8px; display:none; }
+  .err-msg.show { display:block; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen" style="display:none">
+  <h2>⚙️ Configurar sincronização</h2>
+  <p>Suas tarefas serão salvas num arquivo <code>tasks-data.json</code> no seu repositório do GitHub, sincronizando automaticamente entre todos os dispositivos.</p>
+
+  <div class="field">
+    <label>Usuário do GitHub</label>
+    <input type="text" id="cfg-user" placeholder="ex: thiagoalvarenga" />
+  </div>
+  <div class="field">
+    <label>Nome do repositório</label>
+    <input type="text" id="cfg-repo" placeholder="ex: tarefas" />
+  </div>
+  <div class="field">
+    <label>Personal Access Token (PAT)</label>
+    <input type="password" id="cfg-token" placeholder="github_pat_…" />
+    <div class="hint">
+      Crie em <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> →
+      <strong>Fine-grained token</strong> → permissão <strong>Contents: Read and Write</strong> no seu repositório.
+    </div>
+  </div>
+  <div class="err-msg" id="setup-err">Não consegui acessar o repositório. Verifique os dados.</div>
+  <div class="modal-actions" style="margin-top:20px">
+    <button class="btn-primary" id="setup-save">Conectar →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+
+  <div class="app-header">
+    <h1>📋 Minhas Tarefas</h1>
+    <div class="sync-bar">
+      <div class="sync-status">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label"></span>
+      </div>
+      <button class="btn-icon" id="btn-settings" title="Configurações">⚙️</button>
+    </div>
+  </div>
+
+  <div class="add-box">
+    <div class="add-row">
+      <input type="text" id="new-task" placeholder="Nova tarefa…" maxlength="300" />
+      <button id="add-btn">+</button>
+    </div>
+    <div class="cat-chips" id="cat-chips"></div>
+  </div>
+
+  <div class="section-label">Pendentes <span class="count" id="pending-count">0</span></div>
+  <div id="task-list"></div>
+
+  <button class="history-toggle" id="history-toggle">
+    <span class="arrow">▶</span> Histórico (<span id="history-count">0</span>)
+  </button>
+  <div id="history-section" style="display:none"></div>
+</div>
+
+<!-- CALENDAR MODAL -->
+<div class="modal-overlay" id="modal-cal">
+  <div class="modal">
+    <h2>📅 Adicionar ao Google Agenda</h2>
+    <label>Título</label>
+    <input type="text" id="cal-title" maxlength="200" />
+    <label>Descrição (opcional)</label>
+    <textarea id="cal-desc" rows="2" placeholder="Detalhes…"></textarea>
+    <label>Data e hora</label>
+    <div class="modal-row">
+      <input type="date" id="cal-date" />
+      <input type="time" id="cal-time" value="09:00" />
+    </div>
+    <label>Duração (horas)</label>
+    <input type="number" id="cal-dur" value="1" min="0.5" max="8" step="0.5" />
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-cal')">Cancelar</button>
+      <button class="btn-primary" id="modal-cal-open">Abrir no Google Agenda →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MOVE CATEGORY MODAL -->
+<div class="modal-overlay" id="modal-move">
+  <div class="modal">
+    <h2>↕ Mover para categoria</h2>
+    <div class="move-chips" id="move-chips"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-move')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW CATEGORY MODAL -->
+<div class="modal-overlay" id="modal-newcat">
+  <div class="modal">
+    <h2>✨ Nova categoria</h2>
+    <label>Nome</label>
+    <input type="text" id="newcat-name" placeholder="Ex: Aulas, Eventos…" maxlength="30" />
+    <label>Ícone</label>
+    <div class="emoji-row" id="emoji-row"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('modal-newcat')">Cancelar</button>
+      <button class="btn-primary" id="newcat-save">Criar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── Config ────────────────────────────────────────────────────────────────
+const CFG_KEY = 'gh_cfg_v1';
+
+function loadCfg() { try { return JSON.parse(localStorage.getItem(CFG_KEY)) || null; } catch { return null; } }
+function saveCfg(c) { localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
+
+let cfg = loadCfg();
+
+// ─── GitHub API ────────────────────────────────────────────────────────────
+const DATA_FILE = 'tasks-data.json';
+let fileSha = null; // needed for PUT
+
+async function ghGet(path) {
+  const r = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${path}`, {
+    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json' }
+  });
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error(`GitHub GET ${r.status}`);
+  return r.json();
+}
+
+async function ghPut(path, content, sha) {
+  const body = {
+    message: 'update tasks',
+    content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+  };
+  if (sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${cfg.user}/${cfg.repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${cfg.token}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(`GitHub PUT ${r.status}`);
+  const data = await r.json();
+  return data.content.sha;
+}
+
+// ─── Sync status ───────────────────────────────────────────────────────────
+function setSyncStatus(state, text) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + state;
+  lbl.textContent = text;
+}
+
+// ─── Data ──────────────────────────────────────────────────────────────────
+const DEFAULT_GROUPS = [
+  { key:'orientacoes', label:'Orientações', icon:'🎓' },
+  { key:'pareceres',   label:'Pareceres',   icon:'📝' },
+  { key:'lattes',      label:'Lattes',       icon:'💻' },
+  { key:'artigos',     label:'Artigos',      icon:'📄' },
+  { key:'outros',      label:'Outros',       icon:'📌' },
+];
+
+const SEED_TASKS = [
+  { text:"Orientação: inserir Agabho no Lattes (coincluída)",            group:"orientacoes" },
+  { text:"Orientação: inserir João Reale no Lattes (coincluída)",         group:"orientacoes" },
+  { text:"Orientação: inserir Geysi no Lattes (coincluída)",              group:"orientacoes" },
+  { text:"Orientação: inserir Pedro Teixeira no Lattes (coincluída)",     group:"orientacoes" },
+  { text:"Orientação: inserir Gabriel Warrak no Lattes (coincluída)",     group:"orientacoes" },
+  { text:"Parecer 2026: Maracanã",                                        group:"pareceres"   },
+  { text:"Parecer 2026: Histórias, Histórias",                            group:"pareceres"   },
+  { text:"Parecer 2026: Cantareira",                                      group:"pareceres"   },
+  { text:"Inserir Aula Summer School Pisa e encerrar pós-doc de Pisa no Lattes", group:"lattes" },
+  { text:"Inserir pós-doc da UnB no Lattes",                              group:"lattes"      },
+  { text:"Produzir artigo sobre os depositantes de Havana",               group:"artigos"     },
+  { text:"Produzir artigo geral sobre a tese em português",               group:"artigos"     },
+  { text:"Produzir artigo comparando a Caixa da Corte com outros no mundo no mesmo período (inglês)", group:"artigos" },
+  { text:"Produzir artigo da Bolsa de Valores",                           group:"artigos"     },
+  { text:"Publicação em inglês sem comparação com Levy, com outras comparações", group:"artigos" },
+  { text:"Continuar produzindo o site OGUM",                              group:"outros"      },
+  { text:"Diamantina/Cedeplar – já enviado, verificar publicação",        group:"outros"      },
+];
+
+let tasks   = [];
+let history = [];
+let groups  = DEFAULT_GROUPS.slice();
+let selectedGroup = groups[0].key;
+
+// ─── Load from GitHub ──────────────────────────────────────────────────────
+async function loadFromGitHub() {
+  setSyncStatus('saving', 'carregando…');
+  try {
+    const file = await ghGet(DATA_FILE);
+    if (!file) {
+      // First time — seed
+      tasks   = SEED_TASKS.map((s, i) => ({ id: Date.now() + i, ...s }));
+      history = [];
+      groups  = DEFAULT_GROUPS.slice();
+      fileSha = await saveToGitHub();
+    } else {
+      fileSha = file.sha;
+      const data = JSON.parse(decodeURIComponent(escape(atob(file.content.replace(/\n/g,'')))));
+      tasks   = data.tasks   || [];
+      history = data.history || [];
+      groups  = data.groups  || DEFAULT_GROUPS.slice();
+    }
+    setSyncStatus('ok', 'sincronizado');
+  } catch(e) {
+    setSyncStatus('error', 'erro de conexão');
+    console.error(e);
+    // Fall back to localStorage cache
+    const cache = localStorage.getItem('tasks_cache');
+    if (cache) { const d = JSON.parse(cache); tasks=d.tasks||[]; history=d.history||[]; groups=d.groups||DEFAULT_GROUPS.slice(); }
+  }
+  selectedGroup = groups[0]?.key || 'outros';
+  renderAll();
+}
+
+// ─── Save to GitHub ────────────────────────────────────────────────────────
+let saveTimer = null;
+
+function scheduleSave() {
+  setSyncStatus('saving', 'salvando…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      fileSha = await saveToGitHub();
+      setSyncStatus('ok', 'sincronizado');
+    } catch(e) {
+      setSyncStatus('error', 'falha ao salvar');
+      console.error(e);
+    }
+  }, 1200);
+}
+
+async function saveToGitHub() {
+  const data = { tasks, history, groups };
+  localStorage.setItem('tasks_cache', JSON.stringify(data)); // local backup
+  return ghPut(DATA_FILE, data, fileSha);
+}
+
+// ─── Modal helpers ─────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+document.querySelectorAll('.modal-overlay').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('active'); });
+});
+
+// ─── Category chips ────────────────────────────────────────────────────────
+function renderCatChips() {
+  const row = document.getElementById('cat-chips');
+  row.innerHTML = '';
+  groups.forEach(g => {
+    const chip = document.createElement('button');
+    chip.className = 'cat-chip' + (g.key === selectedGroup ? ' selected' : '');
+    chip.innerHTML = `${g.icon} ${g.label}`;
+    chip.onclick = () => { selectedGroup = g.key; renderCatChips(); };
+    row.appendChild(chip);
+  });
+  const newChip = document.createElement('button');
+  newChip.className = 'cat-chip new-cat';
+  newChip.textContent = '＋ Nova';
+  newChip.onclick = openNewCatModal;
+  row.appendChild(newChip);
+}
+
+// ─── Render tasks ──────────────────────────────────────────────────────────
+function renderTasks() {
+  const list = document.getElementById('task-list');
+  list.innerHTML = '';
+  document.getElementById('pending-count').textContent = tasks.length;
+
+  if (tasks.length === 0) {
+    list.innerHTML = '<p class="empty">Nenhuma tarefa pendente. 🎉</p>'; return;
+  }
+
+  groups.forEach(g => {
+    const gt = tasks.filter(t => t.group === g.key);
+    if (!gt.length) return;
+    const div = document.createElement('div');
+    div.className = 'group';
+    div.innerHTML = `<div class="group-header"><span>${g.icon}</span>${g.label}</div>`;
+    gt.forEach(t => div.appendChild(makeTaskEl(t)));
+    list.appendChild(div);
+  });
+}
+
+function makeTaskEl(task) {
+  const item = document.createElement('div');
+  item.className = 'task-item';
+
+  const check = document.createElement('div');
+  check.className = 'task-check';
+  check.onclick = () => completeTask(task.id);
+
+  const body = document.createElement('div');
+  body.className = 'task-body';
+
+  const text = document.createElement('div');
+  text.className = 'task-text';
+  text.contentEditable = 'true';
+  text.spellcheck = true;
+  text.textContent = task.text;
+  text.addEventListener('blur', () => {
+    const v = text.textContent.trim();
+    if (v) { task.text = v; scheduleSave(); }
+    else text.textContent = task.text;
+  });
+  text.addEventListener('keydown', e => { if (e.key==='Enter'){e.preventDefault();text.blur();} });
+
+  const actions = document.createElement('div');
+  actions.className = 'task-actions';
+
+  const calBtn = document.createElement('button');
+  calBtn.className = 'btn-action btn-cal';
+  calBtn.innerHTML = '📅 Agendar';
+  calBtn.onclick = () => openCalModal(task.text);
+
+  const moveBtn = document.createElement('button');
+  moveBtn.className = 'btn-action btn-move';
+  moveBtn.innerHTML = '↕ Categoria';
+  moveBtn.onclick = () => openMoveModal(task);
+
+  actions.append(calBtn, moveBtn);
+  body.append(text, actions);
+
+  const del = document.createElement('button');
+  del.className = 'task-del';
+  del.textContent = '×';
+  del.onclick = () => deleteTask(task.id);
+
+  item.append(check, body, del);
+  return item;
+}
+
+// ─── Render history ────────────────────────────────────────────────────────
+function renderHistory() {
+  const section = document.getElementById('history-section');
+  document.getElementById('history-count').textContent = history.length;
+  section.innerHTML = '';
+
+  if (!history.length) { section.innerHTML='<p class="empty">Nenhuma tarefa concluída ainda.</p>'; return; }
+
+  history.slice().reverse().forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<div class="history-check"></div><div class="history-text">${item.text}</div><div class="history-date">${item.date}</div>`;
+    section.appendChild(div);
+  });
+
+  const clr = document.createElement('button');
+  clr.className = 'clear-history';
+  clr.textContent = 'Limpar histórico';
+  clr.onclick = () => {
+    if (confirm('Limpar todo o histórico?')) { history=[]; scheduleSave(); renderHistory(); }
+  };
+  section.appendChild(clr);
+}
+
+function renderAll() { renderCatChips(); renderTasks(); renderHistory(); }
+
+// ─── Task actions ──────────────────────────────────────────────────────────
+function completeTask(id) {
+  const idx = tasks.findIndex(t => t.id===id);
+  if (idx===-1) return;
+  const [t] = tasks.splice(idx,1);
+  history.push({ text:t.text, date: new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}) });
+  scheduleSave(); renderTasks(); renderHistory();
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(t => t.id!==id);
+  scheduleSave(); renderTasks();
+}
+
+function addTask() {
+  const input = document.getElementById('new-task');
+  const text  = input.value.trim();
+  if (!text) return;
+  tasks.push({ id: Date.now(), text, group: selectedGroup });
+  scheduleSave(); renderTasks();
+  input.value=''; input.focus();
+}
+
+// ─── Move modal ────────────────────────────────────────────────────────────
+let movingId = null;
+function openMoveModal(task) {
+  movingId = task.id;
+  const chips = document.getElementById('move-chips');
+  chips.innerHTML = '';
+  groups.forEach(g => {
+    const chip = document.createElement('button');
+    chip.className = 'move-chip' + (g.key===task.group?' current':'');
+    chip.textContent = `${g.icon} ${g.label}`;
+    if (g.key!==task.group) chip.onclick = () => {
+      const t = tasks.find(x=>x.id===movingId);
+      if (t) { t.group=g.key; scheduleSave(); renderTasks(); }
+      closeModal('modal-move');
+    };
+    chips.appendChild(chip);
+  });
+  openModal('modal-move');
+}
+
+// ─── Calendar modal ────────────────────────────────────────────────────────
+function openCalModal(taskText) {
+  document.getElementById('cal-title').value = taskText;
+  document.getElementById('cal-desc').value  = '';
+  const today = new Date();
+  document.getElementById('cal-date').value =
+    today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  openModal('modal-cal');
+  setTimeout(()=>document.getElementById('cal-title').focus(),50);
+}
+
+document.getElementById('modal-cal-open').onclick = () => {
+  const title=document.getElementById('cal-title').value.trim();
+  const desc =document.getElementById('cal-desc').value.trim();
+  const date =document.getElementById('cal-date').value;
+  const time =document.getElementById('cal-time').value;
+  const dur  =parseFloat(document.getElementById('cal-dur').value)||1;
+  if (!title||!date){alert('Preencha o título e a data.');return;}
+  const s=new Date(`${date}T${time}:00`), e=new Date(s.getTime()+dur*3600000);
+  const fmt=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'T'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+'00';
+  window.open(`https://www.google.com/calendar/render?`+new URLSearchParams({action:'TEMPLATE',text:title,dates:`${fmt(s)}/${fmt(e)}`,details:desc}),'_blank');
+  closeModal('modal-cal');
+};
+
+// ─── New category modal ────────────────────────────────────────────────────
+const EMOJIS=['📚','🏛️','✍️','🔬','🗂️','📊','🎯','💡','🧩','🏫','✈️','🌍','🤝','⚖️','🖊️','📬','🗓️','🔗','📰','🎓','📝','💻','📄','📌'];
+let selEmoji = EMOJIS[0];
+
+function openNewCatModal() {
+  document.getElementById('newcat-name').value='';
+  selEmoji=EMOJIS[0]; renderEmojiRow();
+  openModal('modal-newcat');
+  setTimeout(()=>document.getElementById('newcat-name').focus(),50);
+}
+function renderEmojiRow() {
+  const row=document.getElementById('emoji-row'); row.innerHTML='';
+  EMOJIS.forEach(e=>{
+    const b=document.createElement('button');
+    b.className='emoji-opt'+(e===selEmoji?' selected':'');
+    b.textContent=e; b.type='button';
+    b.onclick=()=>{selEmoji=e;renderEmojiRow();};
+    row.appendChild(b);
+  });
+}
+document.getElementById('newcat-save').onclick=()=>{
+  const name=document.getElementById('newcat-name').value.trim();
+  if (!name){document.getElementById('newcat-name').focus();return;}
+  const key='cat_'+Date.now();
+  groups.push({key,label:name,icon:selEmoji});
+  selectedGroup=key;
+  scheduleSave(); renderAll();
+  closeModal('modal-newcat');
+};
+
+// ─── Settings (re-open setup) ──────────────────────────────────────────────
+document.getElementById('btn-settings').onclick=()=>{
+  if (cfg){
+    document.getElementById('cfg-user').value=cfg.user||'';
+    document.getElementById('cfg-repo').value=cfg.repo||'';
+    document.getElementById('cfg-token').value=cfg.token||'';
+  }
+  document.getElementById('app').style.display='none';
+  document.getElementById('setup-screen').style.display='block';
+};
+
+// ─── Event listeners ───────────────────────────────────────────────────────
+document.getElementById('add-btn').onclick = addTask;
+document.getElementById('new-task').addEventListener('keydown', e=>{ if(e.key==='Enter') addTask(); });
+document.getElementById('history-toggle').addEventListener('click', function(){
+  const s=document.getElementById('history-section');
+  const open=s.style.display!=='none';
+  s.style.display=open?'none':'block';
+  this.classList.toggle('open',!open);
+});
+
+// ─── Setup form ────────────────────────────────────────────────────────────
+document.getElementById('setup-save').onclick = async () => {
+  const user  = document.getElementById('cfg-user').value.trim();
+  const repo  = document.getElementById('cfg-repo').value.trim();
+  const token = document.getElementById('cfg-token').value.trim();
+  const err   = document.getElementById('setup-err');
+  err.classList.remove('show');
+
+  if (!user||!repo||!token){ err.textContent='Preencha todos os campos.'; err.classList.add('show'); return; }
+
+  // Test access
+  const btn = document.getElementById('setup-save');
+  btn.textContent='Verificando…'; btn.disabled=true;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${user}/${repo}`, {
+      headers:{ Authorization:`Bearer ${token}`, Accept:'application/vnd.github+json' }
+    });
+    if (!r.ok) throw new Error(r.status);
+    cfg = { user, repo, token };
+    saveCfg(cfg);
+    document.getElementById('setup-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    await loadFromGitHub();
+  } catch(e) {
+    err.textContent='Não consegui acessar o repositório. Verifique usuário, repositório e token.';
+    err.classList.add('show');
+  } finally {
+    btn.textContent='Conectar →'; btn.disabled=false;
+  }
+};
+
+// ─── Init ──────────────────────────────────────────────────────────────────
+if (cfg) {
+  document.getElementById('app').style.display='block';
+  loadFromGitHub();
+} else {
+  document.getElementById('setup-screen').style.display='block';
+}
+</script>
+</body>
+</html>
