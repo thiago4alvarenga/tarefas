@@ -1,21 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1783015848449,
-      "text": "Orientação: inserir Agabho no Lattes (coincluída)",
-      "group": "orientacoes"
-    },
-    {
-      "id": 1783015848450,
-      "text": "Orientação: inserir João Reale no Lattes (coincluída)",
-      "group": "orientacoes"
-    },
-    {
-      "id": 1783015848451,
-      "text": "Orientação: inserir Geysi no Lattes (coincluída)",
-      "group": "orientacoes"
-    },
-    {
       "id": 1783015848452,
       "text": "Orientação: inserir Pedro Teixeira no Lattes (coincluída)",
       "group": "orientacoes"
@@ -86,7 +71,20 @@
       "group": "outros"
     }
   ],
-  "history": [],
+  "history": [
+    {
+      "text": "Orientação: inserir Agabho no Lattes (coincluída)",
+      "date": "02/07/2026"
+    },
+    {
+      "text": "Orientação: inserir João Reale no Lattes (coincluída)",
+      "date": "02/07/2026"
+    },
+    {
+      "text": "Orientação: inserir Geysi no Lattes (coincluída)",
+      "date": "02/07/2026"
+    }
+  ],
   "groups": [
     {
       "key": "orientacoes",
