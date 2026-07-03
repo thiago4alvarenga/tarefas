@@ -1,21 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1783015848454,
-      "text": "Parecer 2026: Maracanã",
-      "group": "pareceres"
-    },
-    {
-      "id": 1783015848455,
-      "text": "Parecer 2026: Histórias, Histórias",
-      "group": "pareceres"
-    },
-    {
-      "id": 1783015848456,
-      "text": "Parecer 2026: Cantareira",
-      "group": "pareceres"
-    },
-    {
       "id": 1783015848457,
       "text": "Inserir Aula Summer School Pisa e encerrar pós-doc de Pisa no Lattes",
       "group": "lattes"
@@ -81,6 +66,18 @@
     {
       "text": "Orientação: inserir Gabriel Warrak no Lattes (coincluída)",
       "date": "02/07/2026"
+    },
+    {
+      "text": "Parecer 2026: Maracanã",
+      "date": "03/07/2026"
+    },
+    {
+      "text": "Parecer 2026: Histórias, Histórias",
+      "date": "03/07/2026"
+    },
+    {
+      "text": "Parecer 2026: Cantareira",
+      "date": "03/07/2026"
     }
   ],
   "groups": [
