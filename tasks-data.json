@@ -44,11 +44,6 @@
       "id": 1783015848465,
       "text": "Diamantina/Cedeplar – já enviado, verificar publicação",
       "group": "outros"
-    },
-    {
-      "id": 1783862217006,
-      "text": "Liberta - Materia do ICL",
-      "group": "artigos"
     }
   ],
   "history": [
@@ -83,6 +78,10 @@
     {
       "text": "Parecer 2026: Cantareira",
       "date": "03/07/2026"
+    },
+    {
+      "text": "Liberta - Materia do ICL",
+      "date": "12/07/2026"
     }
   ],
   "groups": [
