@@ -11,11 +11,6 @@
       "group": "lattes"
     },
     {
-      "id": 1783015848459,
-      "text": "Produzir artigo sobre os depositantes de Havana",
-      "group": "artigos"
-    },
-    {
       "id": 1783015848460,
       "text": "Produzir artigo geral sobre a tese em português",
       "group": "artigos"
@@ -87,6 +82,10 @@
     {
       "text": "Liberta - Materia do ICL",
       "date": "12/07/2026"
+    },
+    {
+      "text": "Produzir artigo sobre os depositantes de Havana",
+      "date": "13/07/2026"
     }
   ],
   "groups": [
