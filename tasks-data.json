@@ -1,11 +1,6 @@
 {
   "tasks": [
     {
-      "id": 1783015848457,
-      "text": "Inserir Aula Summer School Pisa e encerrar pós-doc de Pisa no Lattes",
-      "group": "lattes"
-    },
-    {
       "id": 1783015848458,
       "text": "Inserir pós-doc da UnB no Lattes",
       "group": "lattes"
@@ -86,6 +81,10 @@
     {
       "text": "Produzir artigo sobre os depositantes de Havana",
       "date": "13/07/2026"
+    },
+    {
+      "text": "Inserir Aula Summer School Pisa e encerrar pós-doc de Pisa no Lattes",
+      "date": "22/07/2026"
     }
   ],
   "groups": [
